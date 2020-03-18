@@ -7,3 +7,6 @@
  AWS S3 is a staging location for the data before it gets imported into DynamoDB
  DynamoDB is the main database for querying from the UI.
 
+## Airflow
+#### Custom Plugins
+SODA plugin is a custom airflow plugin that has a custom operator "SodaToS3Operator" to pull data for a certain dataset from the Socrata Open Data API and write it as a json file on S3.
