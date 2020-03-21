@@ -6,8 +6,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.twitter_plugin import TweetsToS3Operator
 from airflow.operators.s3_file_transform_operator import S3FileTransformOperator
 from airflow.operators.aws_plugin import S3DeleteObjectsOperator
+from airflow.operators.aws_plugin import S3ToDynamoDBOperator
 import datetime,requests,collections,logging,json
-from textblob import TextBlob
 
 default_args = {
     'owner': 'airflow',
@@ -18,7 +18,8 @@ default_args = {
     'email_on_retry': False,
     'params': {
         "s3_conn_id": "j17devbucketdata",
-        "s3_bucket": "j17devbucket"
+        "s3_bucket": "j17devbucket",
+        "topic": "COVID-19"
     }
     #'retries': 1,
     #'retry_delay': timedelta(minutes=5),
@@ -53,41 +54,45 @@ with DAG(
     #schedule_interval=timedelta(days=1),
     ) as dag:
 
-    set_time_stamp = PythonOperator(
-        task_id='set_timestamp',
-        description='Sets the timestamp for the dag run and file names',
-        python_callable=push_timestamp
-    )
+    # set_time_stamp = PythonOperator(
+    #     task_id='set_timestamp',
+    #     description='Sets the timestamp for the dag run and file names',
+    #     python_callable=push_timestamp
+    # )
 
-    tweets_to_s3 = TweetsToS3Operator(
-        task_id='tweets_to_s3',
-        description='Writes tweets about a certain topic to S3',
-        topic='COVID-19',
-        s3_conn_id='{{ params.s3_conn_id }}',
-        s3_bucket='{{ params.s3_bucket }}',
-        s3_key='tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}'
-    )
+    # tweets_to_s3 = TweetsToS3Operator(
+    #     task_id='tweets_to_s3',
+    #     description='Writes tweets about a certain topic to S3',
+    #     topic='{{ params.topic }}',
+    #     s3_conn_id='{{ params.s3_conn_id }}',
+    #     s3_bucket='{{ params.s3_bucket }}',
+    #     s3_key='tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}'
+    # )
 
     etl_tweets = S3FileTransformOperator(
-        task_id='etl_tweet_jsons',
+        task_id='etl_tweets',
         description='cleans the tweet jsons pulled',
-        source_s3_key='s3://j17devbucket/tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
-        dest_s3_key='s3://j17devbucket/tweet_data_cleaned_{{ task_instance.xcom_pull(task_ids="set_timestamp") }}.csv',
-        transform_script='etl_scripts/clean_tweets_pipeline.py',
+        #source_s3_key='s3://j17devbucket/tweet_data_{{ params.topic }}.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
+        #dest_s3_key='s3://j17devbucket/cleaned_tweet_data_{{ params.topic }}.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
+        source_s3_key='s3://j17devbucket/tweet_data.20200321T160220Z',
+        dest_s3_key='s3://j17devbucket/cleaned_tweet_data.20200321T160220Z',
         source_aws_conn_id='{{ params.s3_conn_id }}',
-        dest_aws_conn_id='{{ params.s3_conn_id }}'
+        dest_aws_conn_id='{{ params.s3_conn_id }}',
+        replace=True,
+        transform_script='scripts/etl/clean_tweets_pipeline.py'
     )
 
-    generate_graphs = PythonOperator(
-        task_id='generate_graphs',
-        description='Creates graphs based on tweets gathered',
-        python_callable=generate_tweet_graphs
-    )
-
-    get_sentiment = PythonOperator(
+    get_sentiment = S3FileTransformOperator(
         task_id='get_sentiment',
         description='Get sentiment of tweets',
-        python_callable=get_tweet_sentiment
+        #source_s3_key='s3://j17devbucket/cleaned_tweet_data_{{ params.topic }}.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
+        #dest_s3_key='s3://j17devbucket/analyzed_tweet_data_{{ params.topic }}_{{ task_instance.xcom_pull(task_ids="set_timestamp") }}.json',
+        source_s3_key='s3://j17devbucket/cleaned_tweet_data.20200321T160220Z',
+        dest_s3_key='s3://j17devbucket/analyzed_tweet_data_20200321T160220Z.json',
+        source_aws_conn_id='{{ params.s3_conn_id }}',
+        dest_aws_conn_id='{{ params.s3_conn_id }}',
+        replace=True,
+        transform_script='scripts/nlp/sentiment_analysis.py'
     )
 
     results_to_dynamoDB = PythonOperator(
@@ -102,5 +107,5 @@ with DAG(
         python_callable=clean_up_s3
     )
 
-    #set_time_stamp >> tweets_to_s3 >> etl_tweets >> [generate_graphs,get_sentiment] >> results_to_dynamoDB
-    etl_tweets >> [generate_graphs,get_sentiment] >> results_to_dynamoDB
+    #set_time_stamp >> tweets_to_s3 >> etl_tweets >> get_sentiment >> results_to_dynamoDB >> clean_up
+    etl_tweets >> get_sentiment >> results_to_dynamoDB >> clean_up

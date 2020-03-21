@@ -30,7 +30,7 @@ RUN useradd --shell /bin/bash --create-home --home $AIRFLOW_HOME airflow \
     && pip install --upgrade pip \
     && pip install werkzeug==0.16.0 \
     && pip install docutils==0.15 \
-    && pip install boto3 \ 
+    && pip install boto3 \
     && pip install tweepy \
     && pip install textblob \
     && pip install beautifulsoup4 \
@@ -43,11 +43,11 @@ ENV PATH="${HOME}:${PATH}"
 # Add entry point
 COPY ./airflow/entrypoint.sh ${AIRFLOW_HOME}/entrypoint.sh
 COPY airflow/config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
-RUN mkdir ${AIRFLOW_HOME}/etl_scripts
-COPY ./airflow/etl_scripts/ ${AIRFLOW_HOME}/etl_scripts/
+COPY ./airflow/scripts ${AIRFLOW_HOME}/scripts
 
 RUN chmod +x ${AIRFLOW_HOME}/entrypoint.sh
-RUN chmod +x ${AIRFLOW_HOME}/etl_scripts/clean_tweets_pipeline.py
+RUN chmod +x ${AIRFLOW_HOME}/scripts/etl/clean_tweets_pipeline.py
+RUN chmod +x ${AIRFLOW_HOME}/scripts/nlp/sentiment_analysis.py
 RUN chown -R airflow ${AIRFLOW_HOME}
 
 EXPOSE 8080 3306

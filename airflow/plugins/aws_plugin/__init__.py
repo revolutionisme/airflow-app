@@ -1,11 +1,12 @@
 from airflow.plugins_manager import AirflowPlugin
 from aws_plugin.operators.s3_delete_objects import S3DeleteObjectsOperator
+from aws_plugin.operators.s3_to_dynamodb import S3ToDynamoDBOperator
 
 
 class AwsPlugin(AirflowPlugin):
     name = "aws_plugin"
     # A list of class(es) derived from BaseOperator
-    operators = [S3DeleteObjectsOperator]
+    operators = [S3DeleteObjectsOperator,S3ToDynamoDBOperator]
     # A list of class(es) derived from BaseHook
     hooks = []
     # A list of class(es) derived from BaseExecutor
