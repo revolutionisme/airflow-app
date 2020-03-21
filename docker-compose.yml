@@ -10,13 +10,17 @@ services:
       - 8080:8080
     volumes:
       - ./airflow:/usr/local/airflow/
-      - restaurant-data:/airflow-app/data/
+      - app-data:/airflow-app/data/
     environment:
       # load examples - default set to no
       LOAD_EX: n
       EXECUTOR: Local
       AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
       AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+      TWITTER_ACCESS_TOKEN: $TWITTER_ACCESS_TOKEN
+      TWITTER_ACCESS_TOKEN_SECRET: $TWITTER_ACCESS_TOKEN_SECRET
+      TWITTER_CONSUMER_API_KEY: $TWITTER_CONSUMER_API_KEY
+      TWITTER_CONSUMER_API_SECRET_KEY: $TWITTER_CONSUMER_API_SECRET_KEY
 
   mysql:
     image: mysql:5.7
@@ -31,5 +35,5 @@ services:
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --explicit_defaults_for_timestamp=1
 
 volumes:
-  restaurant-data:
+  app-data:
   airflow-mysql-data:

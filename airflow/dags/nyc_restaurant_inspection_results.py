@@ -11,7 +11,7 @@ default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
     'start_date': days_ago(2),
-    'email': ['jamesang717@gmail.com'],
+    'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
@@ -44,8 +44,8 @@ data_to_s3 = SodaToS3Operator(
           "$offset=0&"
           "$where=(grade=\"A\" OR grade=\"B\" OR grade=\"C\") AND "
                     "record_date >= \"2020-03-17T00:00:00.000\"&$limit=2"),
-    s3_conn_id='j17restdata',
-    s3_bucket='j17restaurantdata',
+    s3_conn_id='j17devbucketdata',
+    s3_bucket='j17devbucket',
     s3_key='data_file',
 	dag=dag
 )

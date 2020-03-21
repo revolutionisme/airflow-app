@@ -1,13 +1,14 @@
 from airflow.plugins_manager import AirflowPlugin
-from soda_plugin.operators.soda_to_s3_operator import SodaToS3Operator
+from twitter_plugin.hooks.twitter_hook import TwitterHook
+from twitter_plugin.operators.tweets_to_s3_operator import TweetsToS3Operator
 
 
-class SodaPlugin(AirflowPlugin):
-    name = "soda_plugin"
+class TwitterPlugin(AirflowPlugin):
+    name = "twitter_plugin"
     # A list of class(es) derived from BaseOperator
-    operators = [SodaToS3Operator]
+    operators = [TweetsToS3Operator]
     # A list of class(es) derived from BaseHook
-    hooks = []
+    hooks = [TwitterHook]
     # A list of class(es) derived from BaseExecutor
     executors = []
     # A list of references to inject into the macros namespace
