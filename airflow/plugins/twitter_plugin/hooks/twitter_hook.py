@@ -4,11 +4,18 @@ from tweepy import AppAuthHandler
 import os
 
 class TwitterHook(BaseHook):
+    """
+    Interact with Twitter API.
+
+    :param auth_type:   authentication type - OAuth1 (user), OAuth2 (app)
+    :type auth_type:    int
+    """
+
+
     def __init__(
             self,
-            auth_type=2,
-            *args,
-            **kwargs
+            auth_type = 2,
+            *args,**kwargs
     ):
         """
         Borrowed from airflow.contrib

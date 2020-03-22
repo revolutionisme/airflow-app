@@ -18,7 +18,7 @@ def perform_sentiment_analysis(input, output):
 		while line:
 			tweet_json = json.loads(line)
 			analysis = TextBlob(tweet_json["text"])
-			tweet_json["sentiment"] = str("{0:.5f}".format(analysis.sentiment.polarity))
+			tweet_json["sentiment"] = float("{0:.5f}".format(analysis.sentiment.polarity))
 			parent_json["tweets"].append(tweet_json)
 			line = input_file.readline()
 		output_file.write(json.dumps(parent_json))

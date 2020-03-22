@@ -3,11 +3,9 @@ from airflow.models import BaseOperator
 from airflow.hooks.S3_hook import S3Hook
 from twitter_plugin.hooks.twitter_hook import TwitterHook
 from tempfile import NamedTemporaryFile
-from tweepy.streaming import StreamListener
 from tweepy import TweepError
 from tweepy import parsers
 from tweepy import Stream
-#from tweepy import Cursor
 from tweepy import API
 import logging
 import json
@@ -38,9 +36,8 @@ class TweetsToS3Operator(BaseOperator):
                  s3_conn_id,
                  s3_bucket,
                  s3_key,
-                 max_tweets=100,
-                 *args,
-                 **kwargs):
+                 max_tweets = 100,
+                 *args, **kwargs):
 
         super(TweetsToS3Operator, self).__init__(*args, **kwargs)
 
@@ -99,7 +96,6 @@ class TweetsToS3Operator(BaseOperator):
             # combine tweet jsons in to new line delimited string, where each line is a single json obj
             tweet_results = '\n'.join(tweet_results)
             tmp.write(tweet_results.encode("utf-8"))
-#            tmp.write("hello world".encode("utf-8"))
 
             # Flush the temp file and upload temp file to S3
             tmp.flush()
