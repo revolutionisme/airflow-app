@@ -18,7 +18,6 @@ class TwitterHook(BaseHook):
             *args,**kwargs
     ):
         """
-        Borrowed from airflow.contrib
         Create new connection to Twitter API
         and allows you to interact with twitter api and save data to a file.
         You can then use that file with other
@@ -54,7 +53,7 @@ class TwitterHook(BaseHook):
             # connect to Twitter with OAuth2 (app context)
             auth = AppAuthHandler(os.getenv('TWITTER_CONSUMER_API_KEY'),os.getenv('TWITTER_CONSUMER_API_SECRET_KEY'))
         else:
-            raise ValueError("Invalid auth_type " + str(self.auth_type) + " . Valid AuthTypes are: 1,2")
+            raise ValueError("Invalid auth_type %d . Valid AuthTypes are: 1,2", self.auth_type)
 
         self.t = auth
 

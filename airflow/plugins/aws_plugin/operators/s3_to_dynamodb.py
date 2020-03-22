@@ -79,8 +79,6 @@ class S3ToDynamoDBOperator(BaseOperator):
             for j in json_list:
                 j["topic"] = context['params']['topic']
 
-        logging.info('JSON Obj: ' + json.dumps(json_list[0]))
-
         json_list = self._convert_float_to_decimal(json_list)
         
         logging.info('Inserting rows into dynamodb table %s', self.table_name)

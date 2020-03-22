@@ -81,9 +81,7 @@ class SodaToS3Operator(BaseOperator):
             logging.info("Results will not be paginated")
 
         key_id = 1
-
-        for i in range(2):
-        #while True:
+        while True:
 
             # Open a name temporary file to store output file until S3 upload
             with NamedTemporaryFile("w") as tmp:

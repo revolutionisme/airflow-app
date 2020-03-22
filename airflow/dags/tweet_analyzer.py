@@ -22,8 +22,8 @@ default_args = {
     'params': {
         'topic': 'COVID-19' # TODO: enable appending topic via some UI
     }
-    #'retries': 1,
-    #'retry_delay': timedelta(minutes=5),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
 }
 
 def push_timestamp(**kwargs):
