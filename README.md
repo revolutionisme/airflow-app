@@ -36,8 +36,8 @@ Using the out of the box S3 Transform File Operator, there are 2 main scripts th
 Image: [jam717/airflow-app](https://hub.docker.com/repository/docker/jam717/airflow-app)
 
 ### Tech Stack
-[Apache Airflow](https://airflow.apache.org/)
-[AWS S3](https://aws.amazon.com/s3/)
-[AWS DynamoDB](https://aws.amazon.com/dynamodb/)
-[Docker](https://www.docker.com/)
-[MySQL](https://www.mysql.com/)
+ - [Apache Airflow](https://airflow.apache.org/)
+ - [AWS S3](https://aws.amazon.com/s3/)
+ - [AWS DynamoDB](https://aws.amazon.com/dynamodb/)
+ - [Docker](https://www.docker.com/)
+ - [MySQL](https://www.mysql.com/)
