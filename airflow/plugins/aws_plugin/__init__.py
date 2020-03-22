@@ -1,11 +1,11 @@
 from airflow.plugins_manager import AirflowPlugin
-from soda_plugin.operators.soda_to_s3_operator import SodaToS3Operator
+from aws_plugin.operators.s3_to_dynamodb import S3ToDynamoDBOperator
 
 
-class SodaPlugin(AirflowPlugin):
-    name = "soda_plugin"
+class AwsPlugin(AirflowPlugin):
+    name = "aws_plugin"
     # A list of class(es) derived from BaseOperator
-    operators = [SodaToS3Operator]
+    operators = [S3ToDynamoDBOperator]
     # A list of class(es) derived from BaseHook
     hooks = []
     # A list of class(es) derived from BaseExecutor
