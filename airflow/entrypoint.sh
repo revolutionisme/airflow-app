@@ -4,9 +4,9 @@ set -e
 
 TRY_LOOP="20"
 
-# : "${REDIS_HOST:="redis"}"
-# : "${REDIS_PORT:="6379"}"
-# : "${REDIS_PASSWORD:=""}"
+: "${REDIS_HOST:="redis"}"
+: "${REDIS_PORT:="6379"}"
+: "${REDIS_PASSWORD:=""}"
 
 : "${MYSQL_HOST:="mysql"}"
 : "${MYSQL_PORT:="3306"}"
@@ -32,11 +32,11 @@ if [[ -z "$AIRFLOW__CORE__LOAD_EXAMPLES" && "${LOAD_EX:=n}" == n ]]
     AIRFLOW__CORE__LOAD_EXAMPLES=False
 fi
 
-# if [ -n "$REDIS_PASSWORD" ]; then
-#     REDIS_PREFIX=:${REDIS_PASSWORD}@
-# else
-#     REDIS_PREFIX=
-# fi
+if [ -n "$REDIS_PASSWORD" ]; then
+    REDIS_PREFIX=:${REDIS_PASSWORD}@
+else
+    REDIS_PREFIX=
+fi
 
 wait_for_port() {
   local name="$1" host="$2" port="$3"
@@ -54,7 +54,7 @@ wait_for_port() {
 
 if [ "$AIRFLOW__CORE__EXECUTOR" != "SequentialExecutor" ]; then
   AIRFLOW__CORE__SQL_ALCHEMY_CONN="mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DB"
-#  AIRFLOW__CELERY__CELERY_RESULT_BACKEND="db+mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DB"
+  AIRFLOW__CELERY__CELERY_RESULT_BACKEND="db+mysql://$MYSQL_USER:$MYSQL_PASSWORD@$MYSQL_HOST:$MYSQL_PORT/$MYSQL_DB"
   wait_for_port "Mysql" "$MYSQL_HOST" "$MYSQL_PORT"
 fi
 
