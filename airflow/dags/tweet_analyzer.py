@@ -47,7 +47,6 @@ with DAG(
     tweets_to_s3 = TweetsToS3Operator(
         task_id='tweets_to_s3',
         description='Writes tweets about a certain topic to S3',
-        topic='COVID-19',
         s3_key='tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}'
     )
 
