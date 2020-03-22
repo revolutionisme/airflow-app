@@ -3,7 +3,7 @@ version: "3.7"
 services:
   airflow:
     image: jam717/airflow-app
-    #restart: always
+    restart: always
     depends_on:
       - mysql
     ports:

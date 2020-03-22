@@ -34,7 +34,6 @@ RUN useradd --shell /bin/bash --create-home --home $AIRFLOW_HOME airflow \
     && pip install tweepy \
     && pip install textblob \
     && pip install beautifulsoup4 \
-    && pip install nltk \
     && pip install emoji \
     && pip install apache-airflow[aws,celery,crypto,jdbc,mysql]==$AIRFLOW_VERSION
 
