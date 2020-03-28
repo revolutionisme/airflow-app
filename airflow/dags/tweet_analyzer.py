@@ -20,15 +20,12 @@ default_args = {
     's3_bucket': 'j17devbucket',
     'params': {
         'topic': 'COVID-19' # TODO: enable appending topic via some UI
-    }
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    },
+    #'retries': 1,
+    #'retry_delay': timedelta(minutes=5),
 }
 
-def push_timestamp(**kwargs):
-    utcnow = datetime.datetime.utcnow()
-    timestamp = utcnow.strftime("%Y%m%dT%H%M%SZ")
-    return timestamp
+timestamp = '{{ ts_nodash }}'
 
 
 with DAG(
@@ -38,23 +35,17 @@ with DAG(
     #schedule_interval=timedelta(days=1),
     ) as dag:
 
-    set_time_stamp = PythonOperator(
-        task_id='set_timestamp',
-        description='Sets the timestamp for the dag run and file names',
-        python_callable=push_timestamp
-    )
-
     tweets_to_s3 = TweetsToS3Operator(
         task_id='tweets_to_s3',
         description='Writes tweets about a certain topic to S3',
-        s3_key='tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}'
+        s3_key='tweet_data.' + timestamp
     )
 
     etl_tweets = S3FileTransformOperator(
         task_id='etl_tweets',
         description='cleans the tweet jsons pulled',
-        source_s3_key='s3://j17devbucket/tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
-        dest_s3_key='s3://j17devbucket/cleaned_tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
+        source_s3_key='s3://j17devbucket/tweet_data.' + timestamp,
+        dest_s3_key='s3://j17devbucket/cleaned_tweet_data.' + timestamp,
         source_aws_conn_id='j17devbucketdata',
         dest_aws_conn_id='j17devbucketdata',
         replace=True,
@@ -64,8 +55,8 @@ with DAG(
     get_sentiment = S3FileTransformOperator(
         task_id='get_sentiment',
         description='Get sentiment of tweets',
-        source_s3_key='s3://j17devbucket/cleaned_tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
-        dest_s3_key='s3://j17devbucket/analyzed_tweet_data_{{ task_instance.xcom_pull(task_ids="set_timestamp") }}.json',
+        source_s3_key='s3://j17devbucket/cleaned_tweet_data.' + timestamp,
+        dest_s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
         source_aws_conn_id='j17devbucketdata',
         dest_aws_conn_id='j17devbucketdata',
         replace=True,
@@ -81,7 +72,7 @@ with DAG(
             "location","favorite_count","retweet_count","sentiment"
             ],
         region_name='us-east-1',
-        s3_key='s3://j17devbucket/analyzed_tweet_data_{{ task_instance.xcom_pull(task_ids="set_timestamp") }}.json',
+        s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
         json_key='tweets'
     )
 
@@ -89,10 +80,10 @@ with DAG(
         task_id='clean_up_s3',
         description='Clean up files on s3',
         bucket='j17devbucket',
-        keys=['tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
-           'cleaned_tweet_data.{{ task_instance.xcom_pull(task_ids="set_timestamp") }}',
-           'analyzed_tweet_data_{{ task_instance.xcom_pull(task_ids="set_timestamp") }}.json'
+        keys=['tweet_data.' + timestamp,
+           'cleaned_tweet_data.' + timestamp,
+           'analyzed_tweet_data_' + timestamp + '.json'
            ],
     )
 
-    set_time_stamp >> tweets_to_s3 >> etl_tweets >> get_sentiment >> results_to_dynamoDB >> clean_up
+    tweets_to_s3 >> etl_tweets >> get_sentiment >> results_to_dynamoDB >> clean_up

@@ -24,8 +24,8 @@ class TweetsToS3Operator(BaseOperator):
     :type s3_key:               string
     """
 
-    template_fields = ("s3_key"
-                       )
+
+    template_fields = ('s3_key',)
 
     @apply_defaults
     def __init__(self,
