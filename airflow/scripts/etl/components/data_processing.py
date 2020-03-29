@@ -9,18 +9,19 @@ clean tweet text and write as new json object.
 """
 
 def transform_tweet(tweet_json, json_form):
-    if (not tweet_json["id_str"] or not tweet_json["created_at"] or
-        not tweet_json["user"]["screen_name"] or not tweet_json["text"] or 
-        not tweet_json["user"]["location"] or not tweet_json["favorite_count"]
-        or not tweet_json["retweet_count"]):
+    if not tweet_json["id_str"] or not tweet_json["full_text"]:
         return {}
     json_form["tweet_id"] = tweet_json["id_str"]
     json_form["created_at"] = tweet_json["created_at"]
-    json_form["screen_name"] = tweet_json["user"]["screen_name"]
-    json_form["text"] = tweet_cleaning_for_sentiment_analysis(tweet_json["text"].lower())
-    json_form["location"] = tweet_json["user"]["location"]
-    json_form["favorite_count"] = tweet_json["favorite_count"]
-    json_form["retweet_count"] = tweet_json["retweet_count"]
+    json_form["screen_name"] = tweet_json["user"]["screen_name"] if tweet_json["user"]["screen_name"] else "Unknown"
+    cleaned_tweet = tweet_cleaning_for_sentiment_analysis(tweet_json["full_text"].lower())
+    if cleaned_tweet:
+        json_form["text"] = cleaned_tweet
+    else:
+        return {}
+    json_form["location"] = tweet_json["user"]["location"] if tweet_json["user"]["location"] else "N/A"
+    json_form["favorite_count"] = tweet_json["favorite_count"] if tweet_json["favorite_count"] else "0"
+    json_form["retweet_count"] = tweet_json["retweet_count"] if tweet_json["retweet_count"] else "0"
     return json_form
 
 

@@ -19,7 +19,7 @@ default_args = {
     's3_conn_id': 'j17devbucketdata',
     's3_bucket': 'j17devbucket',
     'params': {
-        'topic': 'COVID-19' # TODO: enable appending topic via some UI
+        'topic': 'nyc' # TODO: enable appending topic via some UI
     },
     #'retries': 1,
     #'retry_delay': timedelta(minutes=5),
@@ -38,6 +38,7 @@ with DAG(
     tweets_to_s3 = TweetsToS3Operator(
         task_id='tweets_to_s3',
         description='Writes tweets about a certain topic to S3',
+        max_tweets=500,
         s3_key='tweet_data.' + timestamp
     )
 

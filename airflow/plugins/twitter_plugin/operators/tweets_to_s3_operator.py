@@ -52,7 +52,7 @@ class TweetsToS3Operator(BaseOperator):
         while len(tweets) < self.max_tweets:
             count = self.max_tweets - len(tweets)
             try:
-                new_tweets = api.search(q=query + " -filter:retweets", count=count, max_id=str(last_id - 1))
+                new_tweets = api.search(q=query + " -filter:retweets", count=count, max_id=str(last_id - 1), tweet_mode='extended')
                 if not new_tweets:
                     break
                 tweets.extend(new_tweets['statuses'])
