@@ -81,6 +81,7 @@ class TweetsToS3Operator(BaseOperator):
                 logging.info("Preparing to gather tweets about %s", context['params']['topic'])
                 tweet_results = self.get_tweets(api, context['params']['topic'])
             else:
+                logging.info("Preparing to gather tweets about %s", context['params']['date'])
                 tweet_results = self.get_tweets(api, "today since:" + str(date.today()))
 
             # output the records from the query to a file

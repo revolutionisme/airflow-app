@@ -19,7 +19,8 @@ default_args = {
     's3_conn_id': 'j17devbucketdata',
     's3_bucket': 'j17devbucket',
     'params': {
-        'topic': 'nyc' # TODO: enable appending topic via some UI
+        'topic': 'nyc', # TODO: enable appending topic via some UI
+        'date': '' # 2020-03-29
     },
     #'retries': 1,
     #'retry_delay': timedelta(minutes=5),
