@@ -29,9 +29,9 @@ class TweetsToS3Operator(BaseOperator):
 
     @apply_defaults
     def __init__(self,
-                 s3_conn_id,
                  s3_bucket,
                  s3_key,
+                 s3_conn_id = 'aws_default',
                  max_tweets = 100,
                  *args, **kwargs):
 

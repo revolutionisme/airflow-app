@@ -15,8 +15,6 @@ default_args = {
     'email': [''],
     'email_on_failure': False,
     'email_on_retry': False,
-    'aws_conn_id': 'j17devbucketdata',
-    's3_conn_id': 'j17devbucketdata',
     's3_bucket': 'j17devbucket',
     'params': {
         'topic': 'nyc', # TODO: enable appending topic via some UI
@@ -39,7 +37,7 @@ with DAG(
     tweets_to_s3 = TweetsToS3Operator(
         task_id='tweets_to_s3',
         description='Writes tweets about a certain topic to S3',
-        max_tweets=500,
+        max_tweets=50,
         s3_key='tweet_data.' + timestamp
     )
 
@@ -48,8 +46,6 @@ with DAG(
         description='cleans the tweet jsons pulled',
         source_s3_key='s3://j17devbucket/tweet_data.' + timestamp,
         dest_s3_key='s3://j17devbucket/cleaned_tweet_data.' + timestamp,
-        source_aws_conn_id='j17devbucketdata',
-        dest_aws_conn_id='j17devbucketdata',
         replace=True,
         transform_script='scripts/etl/clean_tweets_pipeline.py'
     )
@@ -59,8 +55,6 @@ with DAG(
         description='Get sentiment of tweets',
         source_s3_key='s3://j17devbucket/cleaned_tweet_data.' + timestamp,
         dest_s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
-        source_aws_conn_id='j17devbucketdata',
-        dest_aws_conn_id='j17devbucketdata',
         replace=True,
         transform_script='scripts/nlp/sentiment_analysis.py'
     )

@@ -36,10 +36,10 @@ class S3ToDynamoDBOperator(BaseOperator):
     def __init__(self,
                  table_name,
                  table_keys,
-                 aws_conn_id,
                  region_name,
                  s3_key,
                  json_key,
+                 aws_conn_id = 'aws_default',
                  *args, **kwargs):
         
         super().__init__(*args, **kwargs)
