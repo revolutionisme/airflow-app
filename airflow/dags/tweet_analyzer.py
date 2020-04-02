@@ -38,7 +38,7 @@ with DAG(
         task_id='tweets_to_s3',
         topic='{{ dag_run.conf["topic"] }}',
         description='Writes tweets about a certain topic to S3',
-        max_tweets=10,
+        max_tweets=50,
         s3_key='tweet_data.' + timestamp
     )
 
