@@ -72,17 +72,6 @@ class S3ToDynamoDBOperator(BaseOperator):
         s3_key_object = s3.get_key(self.s3_key)
         s3_key_json = json.loads(s3_key_object.get()['Body'].read().decode('utf-8'))
         json_list = s3_key_json[self.json_key]
-        
-        self.table_keys.append("topic")
-        if context['params']['topic']:
-            logging.info('Appending Topic to json: %s', context['params']['topic'])
-            topic_to_add = context['params']['topic']
-        else:
-            logging.info('Appending Topic to json: %s', context['params']['date'])
-            topic_to_add = context['params']['date']
-
-        for j in json_list:
-                j["topic"] = topic_to_add
 
 
         json_list = self._convert_float_to_decimal(json_list)
