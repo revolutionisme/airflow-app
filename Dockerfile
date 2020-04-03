@@ -45,8 +45,8 @@ COPY airflow/config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY ./airflow/scripts ${AIRFLOW_HOME}/scripts
 
 RUN chmod +x ${AIRFLOW_HOME}/entrypoint.sh
-RUN chmod +x ${AIRFLOW_HOME}/scripts/etl/clean_tweets_pipeline.py
-RUN chmod +x ${AIRFLOW_HOME}/scripts/nlp/sentiment_analysis.py
+RUN chmod +x ${AIRFLOW_HOME}/scripts/etl/*.py
+RUN chmod +x ${AIRFLOW_HOME}/scripts/nlp/*.py
 RUN chown -R airflow ${AIRFLOW_HOME}
 
 EXPOSE 8080 3306
