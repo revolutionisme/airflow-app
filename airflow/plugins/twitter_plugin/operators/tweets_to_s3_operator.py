@@ -16,21 +16,28 @@ class TweetsToS3Operator(BaseOperator):
 
     Queries the Twitter API and writes the resulting data to a file.
 
+    :param topic:               The destination s3 connection id.
+    :type topic:                string
     :param s3_conn_id:          The destination s3 connection id.
     :type s3_conn_id:           string
     :param s3_bucket:           The destination s3 bucket.
     :type s3_bucket:            string
     :param s3_key:              The destination s3 key.
     :type s3_key:               string
+    :param twitter_script:      location of the executable transformation script
+    :type twitter_script:       str
     """
 
 
-    template_fields = ('s3_key',)
+    template_fields = ('topic',
+                       's3_key',)
 
     @apply_defaults
     def __init__(self,
                  s3_bucket,
                  s3_key,
+                 topic = '',
+                 twitter_script=None,
                  s3_conn_id = 'aws_default',
                  max_tweets = 100,
                  *args, **kwargs):
@@ -38,6 +45,8 @@ class TweetsToS3Operator(BaseOperator):
         super(TweetsToS3Operator, self).__init__(*args, **kwargs)
 
         # Default - set to 100
+        self.topic = topic
+        self.twitter_script = twitter_script
         self.max_tweets = max_tweets
         self.s3_conn_id = s3_conn_id
         self.s3_bucket = s3_bucket
@@ -62,6 +71,28 @@ class TweetsToS3Operator(BaseOperator):
                 break
         return tweets
 
+
+    def get_trends(self, api):
+        # Returns the top 50 trending topics for a specific WOEID
+        # nyc_trends = api.trends_place(2459115)
+        trend_list = api.trends_place(1)[0]['trends']
+        trends = []
+        # remove trend objects that have tweet_volume: None
+        for trend in trend_list:
+            if trend['tweet_volume']:
+                trends.append(trend)
+        trends = sorted(trends, key=lambda trend: (trend['tweet_volume']),reverse=True)
+
+        # get tweets for top 5 trends
+        tweets = []
+        for i in range(5):
+            query = trends[i]['query']
+            for result in self.get_tweets(api, query):
+                result["topic"] = trends[i]['name']
+                tweets.append(json.dumps(result, ensure_ascii=False))
+        return tweets
+
+
     def execute(self, context):
         """
         Execute the operator.
@@ -76,23 +107,27 @@ class TweetsToS3Operator(BaseOperator):
         # Open a name temporary file to store output file until S3 upload
         with NamedTemporaryFile("wb") as tmp:
 
-            tweet_results = []
-            if context['params']['topic']:
-                logging.info("Preparing to gather tweets about %s", context['params']['topic'])
-                tweet_results = self.get_tweets(api, context['params']['topic'])
+
+            if self.topic:
+                logging.info("Preparing to gather tweets about %s", self.topic)
+                tweet_results = self.get_tweets(api, self.topic)
+                tweet_results_list = []
+                for result in tweet_results:
+                    result["topic"] = self.topic
+                    tweet_results_list.append(json.dumps(result, ensure_ascii=False))
             else:
-                logging.info("Preparing to gather tweets about %s", context['params']['date'])
-                tweet_results = self.get_tweets(api, "today since:" + str(date.today()))
+                logging.info("Preparing to gather top 5 US trends")
+                tweet_results_list = self.get_trends(api)
 
             # output the records from the query to a file
             # the list of records is stored under the "records" key
             logging.info("Writing tweet statuses to: {0}".format(tmp.name))
 
-            tweet_results = [json.dumps(result, ensure_ascii=False) for result in tweet_results]
             # combine tweet jsons in to new line delimited string, where each line is a single json obj
-            tweet_results = '\n'.join(tweet_results)
+            tweet_results = '\n'.join(tweet_results_list)
             tmp.write(tweet_results.encode("utf-8"))
 
+            logging.info("Uploading tweet status file to S3")
             # Flush the temp file and upload temp file to S3
             tmp.flush()
 
@@ -109,4 +144,4 @@ class TweetsToS3Operator(BaseOperator):
 
             tmp.close()
 
-        logging.info("Tweet gathering finished!")
+        logging.info("Upload successful")

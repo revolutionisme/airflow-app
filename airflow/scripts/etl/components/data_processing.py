@@ -22,6 +22,7 @@ def transform_tweet(tweet_json, json_form):
     json_form["location"] = tweet_json["user"]["location"] if tweet_json["user"]["location"] else "N/A"
     json_form["favorite_count"] = tweet_json["favorite_count"] if tweet_json["favorite_count"] else "0"
     json_form["retweet_count"] = tweet_json["retweet_count"] if tweet_json["retweet_count"] else "0"
+    json_form["topic"] = tweet_json["topic"] if tweet_json["topic"] else "N/A"
     return json_form
 
 
@@ -31,7 +32,7 @@ def preprocess(input, output, keep=1):
         while line:
             json_form = {
                 "tweet_id":"","created_at": "","screen_name": "","text": "",
-                "location": "","favorite_count": "","retweet_count": ""
+                "location": "","favorite_count": "","retweet_count": "","topic": ""
             }
             tweet_json = json.loads(line)
             row = transform_tweet(tweet_json, json_form)

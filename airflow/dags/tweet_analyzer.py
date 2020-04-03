@@ -17,7 +17,7 @@ default_args = {
     'email_on_retry': False,
     's3_bucket': 'j17devbucket',
     'params': {
-        'topic': 'nyc', # TODO: enable appending topic via some UI
+        'topic': 'nba', # this is for testing
         'date': '' # 2020-03-29
     },
     #'retries': 1,
@@ -36,6 +36,7 @@ with DAG(
 
     tweets_to_s3 = TweetsToS3Operator(
         task_id='tweets_to_s3',
+        topic='{{ dag_run.conf["topic"] }}',
         description='Writes tweets about a certain topic to S3',
         max_tweets=50,
         s3_key='tweet_data.' + timestamp
@@ -65,7 +66,7 @@ with DAG(
         table_name='jam717-tweets',
         table_keys=[
             "tweet_id","created_at","screen_name","text",
-            "location","favorite_count","retweet_count","sentiment"
+            "location","favorite_count","retweet_count","sentiment","topic"
             ],
         region_name='us-east-1',
         s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
