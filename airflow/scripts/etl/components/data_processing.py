@@ -12,7 +12,7 @@ def transform_tweet(tweet_json, json_form):
     if not tweet_json["id_str"] or not tweet_json["full_text"]:
         return {}
     json_form["tweet_id"] = tweet_json["id_str"]
-    json_form["created_at"] = tweet_json["created_at"]
+    json_form["created_at"] = tweet_json["created_at"] + "#" + json_form["tweet_id"]
     json_form["screen_name"] = tweet_json["user"]["screen_name"] if tweet_json["user"]["screen_name"] else "Unknown"
     cleaned_tweet = tweet_cleaning_for_sentiment_analysis(tweet_json["full_text"].lower())
     if cleaned_tweet:

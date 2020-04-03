@@ -38,7 +38,7 @@ with DAG(
         task_id='tweets_to_s3',
         topic='{{ dag_run.conf["topic"] }}',
         description='Writes tweets about a certain topic to S3',
-        max_tweets=50,
+        max_tweets=100,
         s3_key='tweet_data.' + timestamp
     )
 
@@ -60,17 +60,36 @@ with DAG(
         transform_script='scripts/nlp/sentiment_analysis.py'
     )
 
-    results_to_dynamoDB = S3ToDynamoDBOperator(
-        task_id='write_to_dynamoDB',
-        description='Writes results to dynamoDB',
-        table_name='jam717-tweets',
-        table_keys=[
-            "tweet_id","created_at","screen_name","text",
-            "location","favorite_count","retweet_count","sentiment","topic"
-            ],
+    summarize_sentiment = S3FileTransformOperator(
+        task_id='summarize_sentiment',
+        description='Summarize sentiment of topic',
+        source_s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
+        dest_s3_key='s3://j17devbucket/sentiment_results_' + timestamp + '.json',
+        replace=True,
+        transform_script='scripts/etl/summarize_results.py'
+    )
+
+    # tweets_to_dynamoDB = S3ToDynamoDBOperator(
+    #     task_id='write_tweets_to_dynamoDB',
+    #     description='Writes analzyed tweets to dynamoDB',
+    #     table_name='jam717-tweets',
+    #     table_keys=[
+    #         "tweet_id","created_at","screen_name","text",
+    #         "location","favorite_count","retweet_count","sentiment","topic"
+    #         ],
+    #     region_name='us-east-1',
+    #     s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
+    #     json_key='tweets'
+    # )
+
+    sentiment_results_to_dynamoDB = S3ToDynamoDBOperator(
+        task_id='write_sentiment_to_dynamoDB',
+        description='Writes sentiment results to dynamoDB',
+        table_name='sentiment-results',
+        table_keys=["topic","timestamp","maxNegText","maxPosText","sentiment"],
         region_name='us-east-1',
-        s3_key='s3://j17devbucket/analyzed_tweet_data_' + timestamp + '.json',
-        json_key='tweets'
+        s3_key='s3://j17devbucket/sentiment_results_' + timestamp + '.json',
+        json_key='results'
     )
 
     clean_up = S3DeleteObjectsOperator(
@@ -79,8 +98,10 @@ with DAG(
         bucket='j17devbucket',
         keys=['tweet_data.' + timestamp,
            'cleaned_tweet_data.' + timestamp,
-           'analyzed_tweet_data_' + timestamp + '.json'
+           'analyzed_tweet_data_' + timestamp + '.json',
+           'sentiment_results_' + timestamp + '.json'
            ],
     )
-
-    tweets_to_s3 >> etl_tweets >> get_sentiment >> results_to_dynamoDB >> clean_up
+    
+    tweets_to_s3 >> etl_tweets >> get_sentiment >> summarize_sentiment >> sentiment_results_to_dynamoDB >> clean_up
+    #tweets_to_s3 >> etl_tweets >> get_sentiment >> summarize_sentiment >> [tweets_to_dynamoDB,sentiment_results_to_dynamoDB] >> clean_up
