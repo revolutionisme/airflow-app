@@ -2,7 +2,6 @@
 
 from textblob import TextBlob
 import sys
-import logging
 import json
 
 """
@@ -28,6 +27,6 @@ def perform_sentiment_analysis(input, output):
 input=sys.argv[1]
 output=sys.argv[2]
 
-logging.info("Starting sentiment analysis on tweets...")
+print("Starting sentiment analysis on tweets...")
 perform_sentiment_analysis(input,output)
-logging.info("Completed sentiment analysis!")
+print("Completed sentiment analysis!")

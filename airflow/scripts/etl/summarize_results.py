@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import logging
 import json
 import datetime
 
@@ -46,13 +45,13 @@ def reduce(part_m):
 
 
 def aggregate_sentiment_results(input, output):
-	logging.info("Aggregating results")
+	print("Aggregating results")
 	with open(input, 'r', encoding='utf-8') as input_file:
 		line = input_file.readline()
 		parent_json = {"results": []}
 		batch = []
 		part_m = {}
-		logging.info("Running map...")
+		print("Running map...")
 		while line:
 			tweet_json_object = json.loads(line)
 			tweet_json_array = tweet_json_object["tweets"]
@@ -65,22 +64,22 @@ def aggregate_sentiment_results(input, output):
 			line = input_file.readline()
 		part_m = map(batch, part_m)
 		input_file.close()
-	logging.info("Map phase completed")
+	print("Map phase completed")
 
 	with open(output, 'w', encoding='utf-8') as output_file:
-		logging.info("Running reduce...")
+		print("Running reduce...")
 
 		parent_json["results"] = reduce(part_m)
 
-		logging.info("Reduce completed")
-		logging.info("Writing results to file: %s", output_file.name)
+		print("Reduce completed")
+		print("Writing results to file: " + output_file.name)
 
 		output_file.write(json.dumps(parent_json))
 
 		output_file.close()
-	logging.info("Finished writing results")
+	print("Finished writing results")
 	
 
-logging.info("Summarizing sentiment analysis results...")
+print("Summarizing sentiment analysis results...")
 aggregate_sentiment_results(input,output)
-logging.info("Completed!")
+print("Completed!")
