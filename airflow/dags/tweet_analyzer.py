@@ -16,12 +16,9 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     's3_bucket': 'j17devbucket',
-    'params': {
-        'topic': 'nba', # this is for testing
-        'date': '' # 2020-03-29
-    },
-    #'retries': 1,
-    #'retry_delay': timedelta(minutes=5),
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+    'schedule_interval': '@daily'
 }
 
 timestamp = '{{ ts_nodash }}'
@@ -32,6 +29,7 @@ with DAG(
     default_args=default_args, 
     description='Pulls tweets about a given topic from twitter for analysis',
     #schedule_interval=timedelta(days=1),
+    catchup=False
     ) as dag:
 
     tweets_to_s3 = TweetsToS3Operator(
