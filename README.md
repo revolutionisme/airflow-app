@@ -31,6 +31,8 @@
 Using the out of the box S3 Transform File Operator, there are 2 main scripts that were created to clean the tweets before uploading the data into DynamoDB. 
 1. _[clean_tweets_pipeline.py](https://github.com/jamesang17/airflow-app/blob/master/airflow/scripts/etl/clean_tweets_pipeline.py)_ which extracts the desired fields from each tweepy SearchResultsObject, cleans the text of the tweet for sentiment analysis, and writes each tweet as a json object to a file.
 2. _[sentiment_analysis.py](https://github.com/jamesang17/airflow-app/blob/master/airflow/scripts/nlp/sentiment_analysis.py)_, which runs a pretrained sentiment analysis model from [BlobText](https://textblob.readthedocs.io/en/dev/quickstart.html#sentiment-analysis) and generates a polarity score within [-1.0, 1.0]. Scores above 0 are considered to be positve, below 0 are considered to be negative and at or close to 0 are considered neutral.
+3. _[summarize_results.py](https://github.com/jamesang17/airflow-app/blob/master/airflow/scripts/etl/summarize_results.py)_, which uses the output from the sentiment analysis script to get the average sentiment score from the data, the sentence with the highest and lowest sentiment score.
+
 
 ## Docker
 Image: [jam717/airflow-app](https://hub.docker.com/repository/docker/jam717/airflow-app)
